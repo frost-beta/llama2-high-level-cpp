@@ -96,6 +96,7 @@ static_library("sentencepiece") {
   ]
   configs += [
     ":sentencepiece_internal_config",
+    "//build/config/compiler:exceptions",
     "//build/config/compiler:no_chromium_code",
   ]
 

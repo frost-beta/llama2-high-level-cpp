@@ -59,6 +59,7 @@ cd llama2-high-level-cpp
 ./out/Release/frost_run
 
 # You can also run the original llama2.c code for comparisons.
+# (Note that it does not work under Windows.)
 ./out/Release/original_llama2_run stories15M.bin
 ```
 

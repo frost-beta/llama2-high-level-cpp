@@ -3,21 +3,23 @@ declare_args() {
 }
 
 group("all") {
-  deps = [
-    ":original_llama2_run",
-    ":frost_run",
-  ]
+  deps = [ ":frost_run" ]
+  if (!is_win) {
+    deps += [ ":original_llama2_run" ]
+  }
 }
 
-executable("original_llama2_run") {
-  sources = [ "original_llama2_run.c" ]
-  cflags_c = [
-    "-Wno-sign-compare",
-    "-Wno-unused-variable",
-  ]
+if (!is_win) {
+  executable("original_llama2_run") {
+    sources = [ "original_llama2_run.c" ]
+    cflags_c = [
+      "-Wno-sign-compare",
+      "-Wno-unused-variable",
+    ]
 
-  configs -= [ "//build/config/compiler:default_optimization" ]
-  configs += [ ":fastrun" ]
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ ":fastrun" ]
+  }
 }
 
 executable("frost_run") {
@@ -43,6 +45,11 @@ executable("frost_run") {
   ]
 
   cflags_cc = [ "-Wno-header-hygiene" ]
+
+  if (is_win) {
+    # Increase the initial stack size. The default is 1MB, this is 4MB.
+    ldflags = [ "/STACK:4194304" ]
+  }
 
   configs -= [ "//build/config/compiler:default_optimization" ]
   configs += [ ":fastrun" ]
