@@ -1,0 +1,90 @@
+declare_args() {
+  llama2_c_weigets = "//stories15M.bin"
+}
+
+group("all") {
+  deps = [
+    ":original_llama2_run",
+    ":frost_run",
+  ]
+}
+
+executable("original_llama2_run") {
+  sources = [ "original_llama2_run.c" ]
+  cflags_c = [
+    "-Wno-sign-compare",
+    "-Wno-unused-variable",
+  ]
+
+  configs -= [ "//build/config/compiler:default_optimization" ]
+  configs += [ ":fastrun" ]
+}
+
+executable("frost_run") {
+  sources = [
+    "src/decoder.cc",
+    "src/decoder.h",
+    "src/embedding.cc",
+    "src/embedding.h",
+    "src/feed_forward.cc",
+    "src/feed_forward.h",
+    "src/inference.cc",
+    "src/model_common.h",
+    "src/self_attention.cc",
+    "src/self_attention.h",
+    "src/transformer.cc",
+    "src/transformer.h",
+    "src/tensor.h",
+  ]
+
+  deps = [
+    ":run_export_llama2_c_weights",
+    "//third_party/sentencepiece",
+  ]
+
+  cflags_cc = [ "-Wno-header-hygiene" ]
+
+  configs -= [ "//build/config/compiler:default_optimization" ]
+  configs += [ ":fastrun" ]
+}
+
+config("fastrun") {
+  cflags = [ "-Ofast" ]
+}
+
+# This action exports the weights in llama2.c format to header files.
+# For pratical usages we should read the original pytorch weights instead, but
+# this repo serves as a proof of concept and we just read stories15M.bin to get
+# weights.
+action("run_export_llama2_c_weights") {
+  script = "//build/gn_run_binary.py"
+  deps = [ ":export_llama2_c_weights($host_toolchain)" ]
+
+  inputs = [ llama2_c_weigets ]
+  outputs = [
+    "$target_gen_dir/model_config.h",
+    "$target_gen_dir/token_embedding_table.inc",
+    "$target_gen_dir/rms_att_weight.inc",
+    "$target_gen_dir/rms_ffn_weight.inc",
+    "$target_gen_dir/rms_out_weight.inc",
+    "$target_gen_dir/wq.inc",
+    "$target_gen_dir/wk.inc",
+    "$target_gen_dir/wv.inc",
+    "$target_gen_dir/wo.inc",
+    "$target_gen_dir/w1.inc",
+    "$target_gen_dir/w2.inc",
+    "$target_gen_dir/w3.inc",
+  ]
+
+  args = [
+    rebase_path(get_label_info(":export_llama2_c_weights($host_toolchain)",
+                               "root_out_dir") + "/export_llama2_c_weights",
+                root_build_dir),
+    rebase_path(llama2_c_weigets),
+    rebase_path(target_gen_dir, root_build_dir),
+  ]
+}
+
+executable("export_llama2_c_weights") {
+  sources = [ "export_llama2_c_weights.cc" ]
+}

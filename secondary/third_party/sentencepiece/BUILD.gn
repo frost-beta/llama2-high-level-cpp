@@ -1,0 +1,103 @@
+config("sentencepiece_config") {
+  include_dirs = [
+    ".",
+    "src/builtin_pb",
+    "//secondary/third_party/sentencepiece",
+  ]
+}
+
+config("sentencepiece_internal_config") {
+  include_dirs = [
+    "third_party/protobuf-lite",
+  ]
+  cflags = [
+    "-Wno-deprecated-anon-enum-enum-conversion",
+    "-Wno-deprecated-declarations",
+    "-Wno-deprecated-pragma",
+    "-Wno-macro-redefined",
+  ]
+  defines = [
+    "HAVE_PTHREAD=1",
+  ]
+}
+
+static_library("sentencepiece") {
+  sources = [
+    "third_party/absl/flags/flag.cc",
+
+    "third_party/protobuf-lite/arena.cc",
+    "third_party/protobuf-lite/arenastring.cc",
+    "third_party/protobuf-lite/bytestream.cc",
+    "third_party/protobuf-lite/coded_stream.cc",
+    "third_party/protobuf-lite/common.cc",
+    "third_party/protobuf-lite/extension_set.cc",
+    "third_party/protobuf-lite/generated_enum_util.cc",
+    "third_party/protobuf-lite/generated_message_table_driven_lite.cc",
+    "third_party/protobuf-lite/generated_message_util.cc",
+    "third_party/protobuf-lite/implicit_weak_message.cc",
+    "third_party/protobuf-lite/int128.cc",
+    "third_party/protobuf-lite/io_win32.cc",
+    "third_party/protobuf-lite/message_lite.cc",
+    "third_party/protobuf-lite/parse_context.cc",
+    "third_party/protobuf-lite/repeated_field.cc",
+    "third_party/protobuf-lite/status.cc",
+    "third_party/protobuf-lite/statusor.cc",
+    "third_party/protobuf-lite/stringpiece.cc",
+    "third_party/protobuf-lite/stringprintf.cc",
+    "third_party/protobuf-lite/structurally_valid.cc",
+    "third_party/protobuf-lite/strutil.cc",
+    "third_party/protobuf-lite/time.cc",
+    "third_party/protobuf-lite/wire_format_lite.cc",
+    "third_party/protobuf-lite/zero_copy_stream.cc",
+    "third_party/protobuf-lite/zero_copy_stream_impl.cc",
+    "third_party/protobuf-lite/zero_copy_stream_impl_lite.cc",
+
+    "src/builtin_pb/sentencepiece.pb.cc",
+    "src/builtin_pb/sentencepiece.pb.h",
+    "src/builtin_pb/sentencepiece_model.pb.cc",
+    "src/builtin_pb/sentencepiece_model.pb.h",
+
+    "src/bpe_model.cc",
+    "src/bpe_model.h",
+    "src/builder.cc",
+    "src/builder.h",
+    "src/char_model.cc",
+    "src/char_model.h",
+    "src/common.h",
+    "src/error.cc",
+    "src/filesystem.cc",
+    "src/filesystem.h",
+    "src/freelist.h",
+    "src/init.h",
+    "src/model_factory.cc",
+    "src/model_factory.h",
+    "src/model_interface.cc",
+    "src/model_interface.h",
+    "src/normalization_rule.h",
+    "src/normalizer.cc",
+    "src/normalizer.h",
+    "src/sentencepiece_processor.cc",
+    "src/sentencepiece_processor.h",
+    "src/spec_parser.h",
+    "src/unicode_script.cc",
+    "src/unicode_script.h",
+    "src/unicode_script_map.h",
+    "src/unigram_model.cc",
+    "src/unigram_model.h",
+    "src/util.cc",
+    "src/util.h",
+    "src/word_model.cc",
+    "src/word_model.h",
+  ]
+
+  configs -= [
+    "//build/config/compiler:chromium_code",
+    "//build/config/compiler:no_exceptions",
+  ]
+  configs += [
+    ":sentencepiece_internal_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+
+  public_configs = [ ":sentencepiece_config" ]
+}

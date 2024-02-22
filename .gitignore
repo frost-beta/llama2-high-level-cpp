@@ -1,0 +1,7 @@
+__pycache__
+*.swp
+
+stories*.bin
+
+/out
+/third_party/build-gn
